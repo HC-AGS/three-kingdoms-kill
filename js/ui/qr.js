@@ -4,17 +4,36 @@ import { setConfig, clearConfig, loadConfig, ApiCfg } from '../ai/api-bot.js';
 import { openModal, closeModal, View } from './render.js';
 
 let _libsLoaded = false;
-async function ensureLibs() {
+let _libsPromise = null;
+async function ensureLibs(timeoutMs = 4000) {
   if (_libsLoaded) return true;
-  const srcs = [
-    'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js',
-    'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'
-  ];
-  await Promise.all(srcs.map(s => new Promise(res => {
-    const el = document.createElement('script');
-    el.src = s; el.onload = res; el.onerror = res;
-    document.head.appendChild(el);
-  })));
+  if (_libsPromise) {
+    // 已有加载中的 promise — 只等它，但加超时兜底
+    return await Promise.race([
+      _libsPromise,
+      new Promise(res => setTimeout(() => res(_libsLoaded), timeoutMs))
+    ]);
+  }
+  _libsPromise = new Promise(res => {
+    const srcs = [
+      'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js',
+      'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'
+    ];
+    let done = 0;
+    srcs.forEach(s => {
+      const el = document.createElement('script');
+      el.src = s;
+      const finish = () => { if (++done >= srcs.length) res(); };
+      el.onload = finish;
+      el.onerror = finish;
+      document.head.appendChild(el);
+    });
+  });
+  // 全局超时兜底：网络挂了也不能永远等
+  await Promise.race([
+    _libsPromise,
+    new Promise(res => setTimeout(res, timeoutMs))
+  ]);
   _libsLoaded = !!(window.jsQR && (window.qrcode || window.QRCode));
   return _libsLoaded;
 }
@@ -36,7 +55,7 @@ export function validateCfg(obj) {
 export async function openApiCfgModal(onSaved) {
   const cur = loadConfig();
   const curJson = cur ? JSON.stringify(cur, null, 2) : DEFAULT_TEMPLATE;
-  const ok = await ensureLibs();
+  // 关键：先开模态框，不等 CDN 库；库里加载在后台完成
   openModal({
     title: 'AI API 配置',
     body: `
@@ -47,7 +66,7 @@ export async function openApiCfgModal(onSaved) {
             <video id="qr-video" playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
             <canvas id="qr-canvas" style="display:none;"></canvas>
             <div id="qr-scan-hint" style="color:#c8b68c;font-size:12px;text-align:center;padding:12px;">
-              ${ok ? '点击下方"启动摄像头"开始扫码<br/><span style="font-size:11px;opacity:.6;">(需 HTTPS 或 localhost，浏览器会请求权限)</span>' : '<span style="color:#f2a89b;">扫码库未加载（离线）<br/>请用"手动粘贴 JSON"入口</span>'}
+              正在加载二维码库…<br/><span style="font-size:11px;opacity:.6;">(需 HTTPS 或 localhost 才能使用摄像头)</span>
             </div>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px;">
@@ -63,16 +82,30 @@ export async function openApiCfgModal(onSaved) {
           <div style="display:flex;gap:6px;margin-top:8px;">
             <button class="btn ghost small" id="btn-fill-tpl">填入模板</button>
             <button class="btn ghost small" id="btn-gen-qr">生成二维码</button>
+            <button class="btn ghost small" id="btn-test">测试连通</button>
             <button class="btn primary small" id="btn-save">保存配置</button>
             <button class="btn ghost small" id="btn-clear">清除</button>
           </div>
         </div>
       </div>
+      <div style="margin-top:10px;padding:8px 10px;background:rgba(201,162,74,.08);border-left:2px solid #c9a24a;font-size:12px;color:#c8b68c;line-height:1.6;">
+        <b style="color:#f5dfa3;">CORS 代理：</b> 默认走 <code style="background:rgba(0,0,0,.35);padding:1px 4px;color:#f5dfa3;">https://corsproxy.io/?</code>。浏览器直连大多数 LLM API 会被 CORS 拦截，代理会自动包一层。若你的端点已开 CORS，可把 <code style="background:rgba(0,0,0,.35);padding:1px 4px;color:#f5dfa3;">corsProxy</code> 字段设为 <code style="background:rgba(0,0,0,.35);padding:1px 4px;color:#f5dfa3;">""</code> 或删掉；也可换成自己的代理前缀（结尾带 <code style="background:rgba(0,0,0,.35);padding:1px 4px;color:#f5dfa3;">?</code> 或用 <code style="background:rgba(0,0,0,.35);padding:1px 4px;color:#f5dfa3;">{url}</code> 占位）。
+      </div>
       <div id="qr-gen-slot" style="margin-top:12px;text-align:center;"></div>
       <div id="cfg-status" style="margin-top:8px;color:#c8b68c;font-size:12px;min-height:20px;">${cur ? '当前已配置: <b style="color:#a8dc9b;">'+escapeHtml(cur.name||'未命名')+'</b> → '+escapeHtml(cur.endpoint||'') : '尚未配置'}</div>
     `,
     hideFooter: true,
-    onMount: () => setupHandlers(onSaved)
+    onMount: () => {
+      setupHandlers(onSaved);
+      // 后台加载 QR 库，加载完刷新提示
+      ensureLibs().then(ok => {
+        const hint = document.getElementById('qr-scan-hint');
+        if (!hint) return;
+        hint.innerHTML = ok
+          ? '点击下方"启动摄像头"开始扫码<br/><span style="font-size:11px;opacity:.6;">(需 HTTPS 或 localhost，浏览器会请求权限)</span>'
+          : '<span style="color:#f2a89b;">扫码库未加载（离线）<br/>请用"手动粘贴 JSON"入口</span>';
+      });
+    }
   });
 }
 
@@ -87,6 +120,7 @@ const DEFAULT_TEMPLATE = `{
   "maxTokens": 600,
   "responseFormat": "json",
   "timeoutMs": 20000,
+  "corsProxy": "https://corsproxy.io/?",
   "seat": { "mode": "replace-one", "index": -1, "fallback": "local-bot" }
 }`;
 
@@ -108,7 +142,7 @@ export function asciiUnescape(s) {
 export function compressCfg(obj) {
   const out = {};
   // 极简 schema — 二维码版可省略 schema 字段（识别时会补默认）
-  const keep = ['schema','name','provider','endpoint','apiKey','model','temperature','maxTokens','topP','requestFormat','responsePath','responseFormat','timeoutMs','seat','systemPromptOverride'];
+  const keep = ['schema','name','provider','endpoint','apiKey','model','temperature','maxTokens','topP','requestFormat','responsePath','responseFormat','timeoutMs','seat','systemPromptOverride','corsProxy'];
   keep.forEach(k => {
     const v = obj[k];
     if (v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)) return;
@@ -122,6 +156,7 @@ export function compressCfg(obj) {
     if (k === 'requestFormat' && v === 'openai') return;
     if (k === 'responseFormat' && v === 'json') return;
     if (k === 'timeoutMs' && v === 20000) return;
+    if (k === 'corsProxy' && v === 'https://corsproxy.io/?') return;
     if (k === 'responsePath') return; // 依赖 provider 自动推断
     if (k === 'seat') {
       const s = v || {};
@@ -158,6 +193,27 @@ function setupHandlers(onSaved) {
     ta.value = DEFAULT_TEMPLATE;
     setStatus('配置已清除', true);
     onSaved && onSaved(null);
+  };
+  document.getElementById('btn-test').onclick = async () => {
+    let obj;
+    try { obj = JSON.parse(ta.value); } catch (e) { setStatus('JSON 无效: '+e.message, false); return; }
+    setStatus('测试中…', null);
+    try {
+      const { callApi, wrapWithProxy, ApiCfg: A } = await import('../ai/api-bot.js');
+      const prev = A.config;
+      A.config = obj;   // 临时注入用于测试
+      const sys = '你是一个只回复 JSON 的测试端点。';
+      const user = JSON.stringify({ kind:'ping', prompt:'回复 {"ok":true,"echo":"pong"} 即可', options:[] });
+      const url = wrapWithProxy(obj.endpoint, obj);
+      setStatus('→ 请求已发往 <code style="color:#f5dfa3;">' + url.slice(0, 90) + (url.length>90?'…':'') + '</code>，等待响应…', null);
+      const t0 = performance.now();
+      const txt = await callApi(null, { system: sys, user, history: [] });
+      const dt = Math.round(performance.now() - t0);
+      A.config = prev;
+      setStatus(`✓ 连通成功 · ${dt}ms · 响应长度 ${txt.length} 字节<br/><span style="color:#8d7c5a;font-size:11px;">${escapeHtml(txt.slice(0, 160))}${txt.length>160?'…':''}</span>`, true);
+    } catch (e) {
+      setStatus('✗ 测试失败: ' + escapeHtml(e.message), false);
+    }
   };
   document.getElementById('btn-save').onclick = () => {
     let obj;

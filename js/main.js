@@ -76,14 +76,20 @@ function updateApiStatus() {
   const cfg = loadConfig();
   const el = $('#api-cfg-status');
   if (!el) return;
-  if (cfg) el.innerHTML = `<span style="color:#a8dc9b;">✓ ${cfg.name||'未命名'}</span> · ${cfg.model||''}`;
-  else el.innerHTML = `<span style="color:#8d7c5a;">未配置</span>`;
+  if (cfg) {
+    const seat = cfg.seat || {};
+    const mode = seat.mode || 'replace-all';
+    const modeCN = { 'replace-all': '全AI', 'replace-one': '单座位', 'assist': '辅助我' }[mode] || mode;
+    const proxy = cfg.corsProxy === '' || cfg.corsProxy === null ? '直连' : (cfg.corsProxy || 'corsproxy.io');
+    el.innerHTML = `<span style="color:#a8dc9b;">✓ ${escapeFn(cfg.name||'未命名')}</span> · ${escapeFn(cfg.model||'')} · <span title="座位模式">${modeCN}</span> · <span title="CORS 代理">${proxy}</span>`;
+  } else el.innerHTML = `<span style="color:#8d7c5a;">未配置</span>`;
 }
+function escapeFn(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 loadConfig();
 updateApiStatus();
 
-// 手机端初始化：横屏引导 + 全屏
-Mobile.init();
+// 手机端初始化：横屏引导 + 全屏（防抛异常影响主流程）
+try { Mobile.init(); } catch (e) { console.warn('[mobile] init failed', e); }
 
 function forceCount(n) {
   menuOpt.count = n;
@@ -394,25 +400,28 @@ async function startGame() {
   // 安装 AI / 技能钩子
   installAI(st);
   Skills.installAll(st);
-  // API AI — 如果开启且有配置
+  // API AI — 如果开启且有配置：默认接管所有 AI 座位
   if (menuOpt.useApi && ApiCfg.config) {
-    const seat = ApiCfg.config.seat || { mode: 'replace-one', index: -1 };
-    const idxWanted = seat.index >= 0 ? seat.index : -1;
-    // 决定接管哪些座位
+    const seat = ApiCfg.config.seat || {};
+    const mode = seat.mode || 'replace-all';
     ApiCfg.boundSeats.clear();
-    if (seat.mode === 'replace-all') {
-      st.players.forEach(p => { if (!p.isHuman) ApiCfg.boundSeats.add(p.idx); });
-    } else if (seat.mode === 'assist') {
-      st.players.forEach(p => { if (p.isHuman) ApiCfg.boundSeats.add(p.idx); });
-    } else {
-      // replace-one：优先指定 index，否则随机挑一个非本人 AI 座位
+    if (mode === 'replace-one') {
+      const idxWanted = seat.index >= 0 ? seat.index : -1;
       const candidates = st.players.filter(p => !p.isHuman);
       if (idxWanted >= 0 && candidates.some(p => p.idx === idxWanted)) ApiCfg.boundSeats.add(idxWanted);
       else if (candidates.length) ApiCfg.boundSeats.add(candidates[Math.floor(Math.random() * candidates.length)].idx);
+    } else if (mode === 'assist') {
+      st.players.forEach(p => { if (p.isHuman) ApiCfg.boundSeats.add(p.idx); });
+    } else {
+      // replace-all（默认）：所有非人类座位都走同一 API
+      st.players.forEach(p => { if (!p.isHuman) ApiCfg.boundSeats.add(p.idx); });
     }
     installApiAI(st);
-    const names = [...ApiCfg.boundSeats].map(i => st.players[i]?.name).filter(Boolean).join('、');
-    st.log(`【API AI】接管座位：${names || '（无）'}`, 'hdr');
+    const names = [...ApiCfg.boundSeats].map(i => st.players[i]?.name).filter(Boolean);
+    st.log(`【API AI】接管 ${names.length} 个座位：${names.join('、') || '（无）'}`, 'hdr');
+    if (ApiCfg.config.corsProxy !== '' && ApiCfg.config.corsProxy !== null && ApiCfg.config.corsProxy !== undefined) {
+      st.log(`【API】经 CORS 代理：${ApiCfg.config.corsProxy}`, 'hdr');
+    }
   }
   // 左慈化身：随机 2 个技能
   st.players.forEach(p => {

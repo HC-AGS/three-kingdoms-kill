@@ -156,6 +156,27 @@ export const View = {
     this.renderLog();
     document.getElementById('tb-round').textContent = `第 ${GS.round} 轮`;
     document.getElementById('tb-mode').textContent = modeText(GS);
+    this.renderApiBadge();
+  },
+  renderApiBadge() {
+    const badge = document.getElementById('api-badge');
+    if (!badge) return;
+    // 用全局引用（api-bot.js 里也 export 到 window 便于此处访问）
+    const m = window.__sgsApiBot;
+    if (m) {
+      const cfg = m.ApiCfg.config;
+      const seats = m.ApiCfg.boundSeats.size;
+      if (!cfg || !seats) { badge.classList.add('hidden'); return; }
+      badge.classList.remove('hidden');
+      badge.classList.toggle('err', m.ApiCfg.errors > 0);
+      badge.textContent = `API ${m.ApiCfg.calls}`;
+      badge.title = `${cfg.name} · 接管 ${seats} 个座位 · 调用 ${m.ApiCfg.calls} 次 · 失败 ${m.ApiCfg.errors} 次${m.ApiCfg.lastError ? '\n最近错误：' + m.ApiCfg.lastError : ''}`;
+      return;
+    }
+    import('../ai/api-bot.js').then(mod => {
+      window.__sgsApiBot = mod;
+      this.renderApiBadge();
+    }).catch(() => {});
   },
   setPhase(phase, p) {
     const map = { prepare:'准备阶段', judge:'判定阶段', draw:'摸牌阶段', play:'出牌阶段', discard:'弃牌阶段', end:'结束阶段', dying:'濒死', done:'结束' };

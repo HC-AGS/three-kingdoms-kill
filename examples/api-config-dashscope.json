@@ -9,5 +9,7 @@
   "maxTokens": 600,
   "responseFormat": "json",
   "timeoutMs": 25000,
+  "corsProxy": "https://corsproxy.io/?",
   "seat": { "mode": "replace-one", "index": -1, "fallback": "local-bot" }
 }
+

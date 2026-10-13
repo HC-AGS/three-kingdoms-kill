@@ -286,51 +286,71 @@ function _pickFoe(st, p, enemies, kind) {
 
 async function _botTryActiveSkills(st, p) {
   if (st.finished || !p.alive) return;
-  // 制衡（孙权）
-  if (p.hasSkill('zhiheng') && !p.skillUseFlag.has('zhiheng')) {
-    const bad = p.hand.filter(c => _discardScore(c) > 0);
-    if (bad.length >= 2) {
+  for (const s of p.skills) {
+    if (s.type !== 'active') continue;
+    if (p.skillUseFlag.has(s.id)) continue;
+    if (!p.hasSkill(s.id)) continue;
+    await _runSingleActiveSkill(st, p, s.id, null);
+  }
+}
+
+// 供 API AI 调用：执行一个指定的主动技
+export async function botRunActiveSkill(st, p, skillId, targetIds) {
+  if (!p.alive || st.finished) return false;
+  if (!p.hasSkill(skillId)) return false;
+  const s = p.skills.find(x => x.id === skillId);
+  if (s?.type !== 'active') return false;
+  if (p.skillUseFlag.has(skillId)) return false;
+  return await _runSingleActiveSkill(st, p, skillId, targetIds);
+}
+
+async function _runSingleActiveSkill(st, p, skillId, targetIds) {
+  if (st.finished || !p.alive) return false;
+  const pickedTarget = (targetIds || []).map(id => st.players.find(x => String(x.idx) === String(id))).filter(Boolean);
+  switch (skillId) {
+    case 'zhiheng': {
+      const bad = p.hand.filter(c => _discardScore(c) > 0);
+      if (bad.length < 1) return false;
       p.skillUseFlag.add('zhiheng');
       const pick = bad.slice(0, Math.min(bad.length, 3));
       discardCards(st, p, pick, '制衡');
       drawCards(st, p, pick.length);
       st.log(`<b>${p.name}</b>【制衡】弃 ${pick.length} 张，摸 ${pick.length} 张`);
+      return true;
     }
-  }
-  // 苦肉（黄盖）
-  if (p.hasSkill('kurou') && !p.skillUseFlag.has('kurou') && p.hp >= 3 && Math.random() < 0.4) {
-    p.skillUseFlag.add('kurou');
-    await loseHp(st, p, 1, '苦肉');
-    if (p.alive) drawCards(st, p, 2);
-  }
-  // 青囊（华佗）
-  if (p.hasSkill('qingnang') && !p.skillUseFlag.has('qingnang') && p.hand.length >= 2) {
-    const hurt = st.alivePlayers().find(x => x.hp < x.maxHp && (x === p || areAllies(st, p, x)));
-    if (hurt) {
+    case 'kurou': {
+      if (p.hp < 2) return false;
+      p.skillUseFlag.add('kurou');
+      await loseHp(st, p, 1, '苦肉');
+      if (p.alive) drawCards(st, p, 2);
+      st.log(`<b>${p.name}</b>【苦肉】失去1点体力，摸两张牌`);
+      return true;
+    }
+    case 'qingnang': {
+      if (p.hand.length < 1) return false;
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x.hp < x.maxHp && (x === p || areAllies(st, p, x)));
+      if (!t) return false;
       p.skillUseFlag.add('qingnang');
       discardCards(st, p, [p.hand[0]], '青囊');
-      await heal(st, hurt, 1, p);
-      st.log(`<b>${p.name}</b>【青囊】让 <b>${hurt.name}</b> 回复1点体力`);
+      await heal(st, t, 1, p);
+      st.log(`<b>${p.name}</b>【青囊】令 <b>${t.name}</b> 回复1点体力`);
+      return true;
     }
-  }
-  // 仁德（刘备）
-  if (p.hasSkill('rende') && !p.skillUseFlag.has('rende')) {
-    const allies = st.alivePlayers().filter(x => x !== p && areAllies(st, p, x) && x.hand.length <= 2);
-    if (allies.length && p.hand.length >= 3) {
+    case 'rende': {
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x !== p && areAllies(st, p, x) && x.hand.length <= 2);
+      if (!t || p.hand.length < 2) return false;
       p.skillUseFlag.add('rende');
       const give = p.hand.slice(0, 2);
       removeFromHand(p, give);
-      allies[0].hand.push(...give);
-      st.log(`<b>${p.name}</b>【仁德】给 <b>${allies[0].name}</b> 两张牌`);
-      if (p.hp < p.maxHp) await heal(st, p, 1, p);
+      t.hand.push(...give);
+      st.log(`<b>${p.name}</b>【仁德】给 <b>${t.name}</b> 两张牌`);
+      if (give.length >= 2 && p.hp < p.maxHp) await heal(st, p, 1, p);
+      return true;
     }
-  }
-  // 反间（周瑜）
-  if (p.hasSkill('fanjian') && !p.skillUseFlag.has('fanjian')) {
-    const enemies = st.alivePlayers().filter(x => x !== p && areEnemies(st, p, x));
-    if (enemies.length && p.hand.length >= 1 && Math.random() < 0.5) {
+    case 'fanjian': {
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x !== p && areEnemies(st, p, x));
+      if (!t || !p.hand.length) return false;
       p.skillUseFlag.add('fanjian');
-      const t = enemies[0];
       const suits = ['s','h','c','d'];
       const chosen = t.isHuman ? await UI.askChooseColorSuit(t, '反间：选择一种花色') : suits[Math.floor(Math.random()*4)];
       const show = p.hand[Math.floor(Math.random() * p.hand.length)];
@@ -343,28 +363,24 @@ async function _botTryActiveSkills(st, p) {
         t.hand.push(show);
         st.log(`<b>${p.name}</b>【反间】花色符合，<b>${t.name}</b> 获得【${show.name}】`);
       }
+      return true;
     }
-  }
-  // 义绝（关羽）
-  if (p.hasSkill('yijue') && !p.skillUseFlag.has('yijue')) {
-    const enemies = st.alivePlayers().filter(x => x !== p && areEnemies(st, p, x));
-    if (enemies.length && p.hand.length && Math.random() < 0.4) {
+    case 'yijue': {
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x !== p && areEnemies(st, p, x));
+      if (!t || !p.hand.length) return false;
       p.skillUseFlag.add('yijue');
-      const t = enemies[0];
       const r = await pinPoint(st, p, t);
       if (r && r.winner === p) {
         t.mark.noShanResponse = true;
         t.mark.cantRecover = true;
         st.log(`<b>${p.name}</b>【义绝】胜！<b>${t.name}</b> 本回合不能出闪/不能回复`);
       } else if (r) st.log(`<b>${p.name}</b>【义绝】未胜`);
+      return true;
     }
-  }
-  // 天义（太史慈）
-  if (p.hasSkill('tianyi') && !p.skillUseFlag.has('tianyi')) {
-    const enemies = st.alivePlayers().filter(x => x !== p && areEnemies(st, p, x));
-    if (enemies.length && p.hand.length && Math.random() < 0.6) {
+    case 'tianyi': {
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x !== p && areEnemies(st, p, x));
+      if (!t || !p.hand.length) return false;
       p.skillUseFlag.add('tianyi');
-      const t = enemies[0];
       const r = await pinPoint(st, p, t);
       if (r && r.winner === p) {
         p.mark.extraShaAllowed = (p.mark.extraShaAllowed || 0) + 1;
@@ -373,14 +389,12 @@ async function _botTryActiveSkills(st, p) {
         p.mark.shaDisabled = true;
         st.log(`<b>${p.name}</b>【天义】负！本回合不能使用【杀】`);
       }
+      return true;
     }
-  }
-  // 辕门（吕布）
-  if (p.hasSkill('yuanmen') && !p.skillUseFlag.has('yuanmen')) {
-    const enemies = st.alivePlayers().filter(x => x !== p && areEnemies(st, p, x));
-    if (enemies.length && p.hand.length && Math.random() < 0.5) {
+    case 'yuanmen': {
+      const t = pickedTarget[0] || st.alivePlayers().find(x => x !== p && areEnemies(st, p, x));
+      if (!t || !p.hand.length) return false;
       p.skillUseFlag.add('yuanmen');
-      const t = enemies[0];
       const r = await pinPoint(st, p, t);
       if (r && r.winner === p) {
         const vSha = { id:'v_sha_yuan', defId:'sha', name:'杀', type:'basic', suit:'s', rank:1, _virtual: true };
@@ -388,23 +402,27 @@ async function _botTryActiveSkills(st, p) {
         UI.showUsed(st, p, vSha, [t]);
         await CardResolver.resolveSha(st, p, t, vSha, { unblockable: true });
       }
+      return true;
     }
-  }
-  // 离间（貂蝉）
-  if (p.hasSkill('lijian') && !p.skillUseFlag.has('lijian')) {
-    const males = st.alivePlayers().filter(x => x !== p && x.gender === 'M');
-    const enemies = males.filter(x => areEnemies(st, p, x));
-    if (males.length >= 2 && p.hand.length && Math.random() < 0.5) {
-      p.skillUseFlag.add('lijian');
-      const [a, b] = enemies.length >= 2 ? [enemies[0], enemies[1]]
-                                             : (enemies[0] ? [enemies[0], males.find(m => m !== enemies[0])] : [males[0], males[1]]);
-      if (a && b) {
-        discardCards(st, p, [p.hand[0]], '离间');
-        st.log(`<b>${p.name}</b>【离间】让 <b>${a.name}</b> 与 <b>${b.name}</b> 决斗，先手：${a.name}`);
-        await _juedouFirstA(st, a, b);
+    case 'lijian': {
+      const males = st.alivePlayers().filter(x => x !== p && x.gender === 'M');
+      if (males.length < 2 || !p.hand.length) return false;
+      let a, b;
+      if (pickedTarget.length >= 2) { a = pickedTarget[0]; b = pickedTarget[1]; }
+      else {
+        const enemies = males.filter(x => areEnemies(st, p, x));
+        [a, b] = enemies.length >= 2 ? [enemies[0], enemies[1]]
+                                       : (enemies[0] ? [enemies[0], males.find(m => m !== enemies[0])] : [males[0], males[1]]);
       }
+      if (!a || !b || a === b) return false;
+      p.skillUseFlag.add('lijian');
+      discardCards(st, p, [p.hand[0]], '离间');
+      st.log(`<b>${p.name}</b>【离间】让 <b>${a.name}</b> 与 <b>${b.name}</b> 决斗，先手：${a.name}`);
+      await _juedouFirstA(st, a, b);
+      return true;
     }
   }
+  return false;
 }
 
 async function _juedouFirstA(st, a, b) {

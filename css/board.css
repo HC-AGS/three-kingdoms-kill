@@ -56,7 +56,20 @@
   color: var(--gold-hi);
   text-shadow: 0 0 10px rgba(242,214,122,.4);
 }
-.top-right { display: flex; gap: 8px; justify-content: flex-end; }
+.top-right { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+.api-badge {
+  padding: 3px 8px;
+  background: rgba(74,127,91,.28);
+  border: 1px solid #4a7f5b;
+  border-radius: 3px;
+  color: #a8dc9b;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-family: monospace;
+  cursor: help;
+}
+.api-badge.err { background: rgba(168,36,28,.28); border-color: #a8241c; color: #f2a89b; }
+.api-badge.hidden { display: none; }
 
 .board {
   position: absolute;

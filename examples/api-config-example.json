@@ -13,6 +13,7 @@
   "responsePath": "choices[0].message.content",
   "responseFormat": "json",
   "timeoutMs": 20000,
+  "corsProxy": "https://corsproxy.io/?",
   "seat": {
     "mode": "replace-one",
     "index": -1,
@@ -23,6 +24,6 @@
   "meta": {
     "createdAt": "2026-10-13T18:30:00Z",
     "author": "example",
-    "notes": "OpenAI 官方端点示例。国内可替换 endpoint 为 https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions（provider 改为 dashscope，model 改为 qwen-plus/qwen-max），或本地 Ollama 用 http://localhost:11434/v1/chat/completions"
+    "notes": "OpenAI 官方端点示例。corsProxy 字段用于绕过浏览器 CORS 限制；如你的端点已开 CORS 可删除该字段。国内可替换 endpoint 为 https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions（provider 改为 dashscope，model 改为 qwen-plus/qwen-max），或本地 Ollama 用 http://localhost:11434/v1/chat/completions（本地部署无需代理，删除 corsProxy 字段）"
   }
 }
