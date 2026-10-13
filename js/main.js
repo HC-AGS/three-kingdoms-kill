@@ -234,7 +234,7 @@ $('#card-filter').querySelectorAll('button').forEach(b => b.addEventListener('cl
 renderCards('all');
 
 // ============ 规则手册 ============
-$('#rules-body').innerHTML = RULES_FULL;
+// (RULES_FULL 定义在下面，先声明再赋值)
 
 const RULES_FULL = `
 <h3>一、游戏概述</h3>
@@ -316,6 +316,7 @@ const RULES_FULL = `
 <h3>十一、平衡性说明</h3>
 <p>本改版保持身份博弈、回合制对抗、手牌管理三大核心体验不变；通过扩充武将数量、增加卡牌种类、深化技能联动，提升游戏深度与重开性。</p>
 `;
+$('#rules-body').innerHTML = RULES_FULL;
 
 // ============ 开局流程 ============
 async function startGame() {
