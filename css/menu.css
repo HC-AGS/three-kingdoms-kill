@@ -1,0 +1,239 @@
+/* 首页 / 大厅样式 */
+.menu-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(201,162,74,.16), transparent 60%),
+    radial-gradient(ellipse at 20% 90%, rgba(168,36,28,.14), transparent 55%),
+    linear-gradient(180deg, #1e140c 0%, #100a05 100%);
+}
+.menu-bg::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(201,162,74,.03) 0 2px, transparent 2px 12px),
+    repeating-linear-gradient(-45deg, rgba(201,162,74,.03) 0 2px, transparent 2px 14px);
+  pointer-events: none;
+}
+.menu-bg::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 55%, transparent 30%, rgba(0,0,0,.55) 90%);
+  pointer-events: none;
+}
+.menu-frame {
+  position: relative;
+  width: min(1180px, 96vw);
+  margin: 24px auto;
+  padding: 28px 34px 20px;
+  border: 1px solid rgba(201,162,74,.35);
+  background: linear-gradient(180deg, rgba(45,30,18,.86), rgba(24,15,10,.9));
+  box-shadow: 0 0 0 6px rgba(0,0,0,.35), 0 20px 60px rgba(0,0,0,.6), inset 0 0 40px rgba(0,0,0,.5);
+  border-radius: 4px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+.menu-frame::before {
+  content: "";
+  position: absolute; inset: 8px;
+  border: 1px solid rgba(201,162,74,.15);
+  pointer-events: none;
+}
+
+.menu-header { display: flex; align-items: center; gap: 22px; padding-bottom: 18px; border-bottom: 1px solid rgba(201,162,74,.2); margin-bottom: 16px; }
+.seal {
+  width: 62px; height: 62px;
+  background: linear-gradient(180deg, #b8322a, #6d1512);
+  color: #f7e6c2;
+  display: grid; place-items: center;
+  font-size: 34px; font-weight: 700;
+  border: 3px double rgba(247,230,194,.6);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(120,20,10,.55), inset 0 0 0 2px rgba(0,0,0,.25);
+  letter-spacing: 0;
+  font-family: "KaiTi", "STKaiti", serif;
+}
+.titles { flex: 1; }
+.game-title {
+  margin: 0;
+  font-family: "KaiTi", "STKaiti", "Songti SC", serif;
+  font-size: 42px;
+  letter-spacing: 6px;
+  color: #f5dfa3;
+  text-shadow: 0 2px 0 #4a2a10, 0 0 24px rgba(242,214,122,.5);
+}
+.game-title .dot { color: var(--red-hi); margin: 0 4px; }
+.game-sub { margin: 4px 0 0; color: #c8b68c; font-size: 13px; letter-spacing: 3px; }
+
+/* 标签 */
+.menu-tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid rgba(201,162,74,.2); }
+.tab {
+  padding: 10px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #9d8b68;
+  letter-spacing: 3px;
+  font-size: 15px;
+}
+.tab:hover { color: #d8c193; }
+.tab.active { color: var(--gold-hi); border-bottom-color: var(--gold); text-shadow: 0 0 10px rgba(242,214,122,.4); }
+
+.panel { display: none; padding: 12px 0 8px; }
+.panel.active { display: block; }
+
+/* 表单 */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 26px;
+  padding: 8px 4px 4px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.span2 { grid-column: span 2; flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: center; }
+.field label { font-size: 13px; color: #c8b68c; letter-spacing: 3px; }
+.field label small { margin-left: 8px; color: #8d7c5a; font-size: 11px; letter-spacing: 1px; }
+.field input[type=text] {
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(201,162,74,.35);
+  padding: 8px 12px;
+  color: var(--paper);
+  border-radius: 3px;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+.field input[type=text]:focus { outline: none; border-color: var(--gold); }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; letter-spacing: 2px; color: #c8b68c; cursor: pointer; }
+
+.seg { display: inline-flex; gap: 0; border: 1px solid rgba(201,162,74,.3); border-radius: 3px; overflow: hidden; background: rgba(0,0,0,.3); }
+.seg button {
+  padding: 7px 16px;
+  background: transparent;
+  border: none;
+  color: #a19075;
+  font-size: 14px;
+  letter-spacing: 2px;
+  border-right: 1px solid rgba(201,162,74,.2);
+}
+.seg button:last-child { border-right: none; }
+.seg button:hover { background: rgba(201,162,74,.1); color: #d8c193; }
+.seg button.on { background: linear-gradient(180deg, #b8322a, #6d1512); color: #f7e6c2; text-shadow: 0 1px 0 rgba(0,0,0,.5); }
+
+.mode-desc {
+  margin: 18px 0 4px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--gold);
+  background: rgba(201,162,74,.06);
+  color: #cbb888;
+  font-size: 13px;
+  line-height: 1.8;
+  letter-spacing: 1px;
+  min-height: 62px;
+}
+
+.menu-actions { display: flex; gap: 14px; justify-content: center; margin-top: 18px; }
+.menu-foot {
+  display: flex; justify-content: space-between;
+  padding-top: 14px; margin-top: 14px;
+  border-top: 1px solid rgba(201,162,74,.15);
+  color: #7d6a4a; font-size: 12px; letter-spacing: 2px;
+}
+
+/* 筛选栏 */
+.filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 4px 0 12px; }
+.filter-row button {
+  padding: 6px 14px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid rgba(201,162,74,.3);
+  color: #c8b68c;
+  border-radius: 3px;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.filter-row button.on { background: linear-gradient(180deg, #b8322a, #6d1512); color: #f7e6c2; border-color: #e0a173; }
+.filter-row button em { font-style: normal; opacity: .6; margin-left: 4px; }
+.filter-row input {
+  flex: 1;
+  min-width: 160px;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(201,162,74,.3);
+  padding: 6px 12px;
+  border-radius: 3px;
+  color: var(--paper);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.filter-row input:focus { outline: none; border-color: var(--gold); }
+
+/* 武将卡片网格 */
+.gen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 8px 0;
+}
+.gen-card {
+  background: linear-gradient(180deg, #2e2014, #1a1008);
+  border: 1px solid rgba(201,162,74,.35);
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.gen-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+  box-shadow: 0 8px 22px rgba(0,0,0,.5), 0 0 0 1px rgba(201,162,74,.25);
+}
+.gen-card .gc-top { display: flex; gap: 10px; }
+.gen-card .gc-port { width: 74px; height: 96px; flex-shrink: 0; border: 1px solid rgba(201,162,74,.4); background: #120a04; overflow: hidden; border-radius: 3px; }
+.gen-card .gc-port svg { width: 100%; height: 100%; display: block; }
+.gen-card .gc-info { flex: 1; }
+.gen-card .gc-name { font-size: 20px; color: #f5dfa3; letter-spacing: 3px; font-family: "KaiTi", "STKaiti", serif; }
+.gen-card .gc-fac { font-size: 12px; letter-spacing: 3px; padding: 2px 6px; display: inline-block; margin-top: 4px; border-radius: 2px; color: #fff; }
+.gen-card .gc-hp { font-size: 13px; margin-top: 6px; color: #c8b68c; letter-spacing: 2px; }
+.gen-card .gc-skills { margin-top: 6px; font-size: 11px; color: #9d8b68; line-height: 1.55; letter-spacing: 1px; }
+.gc-fac.f-wei { background: #2b5b8a; }
+.gc-fac.f-shu { background: #1e6f3d; }
+.gc-fac.f-wu  { background: #a8241c; }
+.gc-fac.f-qun { background: #7a5a1e; }
+
+/* 卡牌图鉴 */
+.card-grid {
+  columns: 4 200px;
+  column-gap: 14px;
+  padding: 8px 0;
+}
+.card-grid .card-cell { break-inside: avoid; margin-bottom: 12px; }
+.catalog-card {
+  background: linear-gradient(180deg, #f2e5c9, #d9c69a);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #8a6a25;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+.catalog-card h4 { margin: 0 0 4px; font-size: 15px; letter-spacing: 2px; }
+.catalog-card p { margin: 0; font-size: 12px; line-height: 1.6; color: #4a3520; }
+.catalog-card .num { float: right; color: #8a6a25; font-size: 12px; }
+
+/* 规则 */
+.rules-body {
+  padding: 8px 26px 4px 6px;
+  color: #d8c69a;
+  line-height: 1.9;
+  font-size: 14px;
+  letter-spacing: 1px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.rules-body h3 { color: var(--gold-hi); margin: 20px 0 8px; font-size: 17px; letter-spacing: 3px; border-bottom: 1px dashed rgba(201,162,74,.3); padding-bottom: 6px; }
+.rules-body h4 { color: #e2c78a; margin: 14px 0 6px; font-size: 15px; letter-spacing: 2px; }
+.rules-body table { border-collapse: collapse; width: 100%; margin: 6px 0; }
+.rules-body th, .rules-body td { border: 1px solid rgba(201,162,74,.25); padding: 5px 8px; font-size: 13px; text-align: left; }
+.rules-body th { background: rgba(201,162,74,.1); color: var(--gold-hi); }
+.rules-body ul { padding-left: 22px; margin: 4px 0; }
+.rules-body li { margin: 3px 0; }
+.rules-body code { background: rgba(0,0,0,.4); padding: 1px 5px; border-radius: 2px; color: #f5dfa3; font-size: 12px; }

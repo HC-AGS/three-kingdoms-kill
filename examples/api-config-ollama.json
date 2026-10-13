@@ -1,0 +1,13 @@
+{
+  "schema": "sgs-ai-endpoint/v1",
+  "name": "示例-本地Ollama",
+  "provider": "ollama",
+  "endpoint": "http://localhost:11434/v1/chat/completions",
+  "model": "qwen2.5:14b",
+  "temperature": 0.6,
+  "maxTokens": 800,
+  "responseFormat": "json",
+  "timeoutMs": 60000,
+  "seat": { "mode": "replace-all", "index": -1, "fallback": "local-bot" },
+  "meta": { "notes": "本地 Ollama 无 apiKey 字段；启动命令：ollama serve && ollama pull qwen2.5:14b" }
+}

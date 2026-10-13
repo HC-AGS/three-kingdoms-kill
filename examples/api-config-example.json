@@ -1,0 +1,28 @@
+{
+  "schema": "sgs-ai-endpoint/v1",
+  "name": "示例-OpenAI兼容",
+  "provider": "openai-compat",
+  "endpoint": "https://api.openai.com/v1/chat/completions",
+  "apiKey": "sk-REPLACE_WITH_YOUR_KEY",
+  "model": "gpt-4o-mini",
+  "temperature": 0.6,
+  "maxTokens": 600,
+  "topP": 1,
+  "headers": {},
+  "requestFormat": "openai",
+  "responsePath": "choices[0].message.content",
+  "responseFormat": "json",
+  "timeoutMs": 20000,
+  "seat": {
+    "mode": "replace-one",
+    "index": -1,
+    "difficulty": "hard",
+    "fallback": "local-bot"
+  },
+  "systemPromptOverride": null,
+  "meta": {
+    "createdAt": "2026-10-13T18:30:00Z",
+    "author": "example",
+    "notes": "OpenAI 官方端点示例。国内可替换 endpoint 为 https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions（provider 改为 dashscope，model 改为 qwen-plus/qwen-max），或本地 Ollama 用 http://localhost:11434/v1/chat/completions"
+  }
+}

@@ -1,0 +1,191 @@
+/* 卡牌样式（原创古风卡面） */
+.sgs-card {
+  --card-w: 88px;
+  --card-h: 124px;
+  width: var(--card-w);
+  height: var(--card-h);
+  position: relative;
+  background:
+    linear-gradient(180deg, #f7ecd0 0%, #e8d8b3 55%, #d9c69a 100%);
+  border: 1px solid #8a6a25;
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: var(--font-cjk);
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.35);
+  flex-shrink: 0;
+}
+.sgs-card.t-basic { background: linear-gradient(180deg,#f7ecd0,#e6d3a4 60%,#ceb884); }
+.sgs-card.t-trick { background: linear-gradient(180deg,#f2e5c9,#e2cba1 60%,#c9ac78); }
+.sgs-card.t-equip { background: linear-gradient(180deg,#efe0bc,#d8bd8b 60%,#b78f58); }
+.sgs-card::before {
+  content: "";
+  position: absolute; inset: 3px;
+  border: 1px solid rgba(138,106,37,.5);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.sgs-card::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255,255,255,.35), transparent 40%),
+    radial-gradient(circle at 80% 85%, rgba(90,60,20,.15), transparent 45%);
+  pointer-events: none;
+}
+
+.card-corner {
+  position: absolute;
+  left: 5px; top: 4px;
+  width: 22px;
+  text-align: center;
+  line-height: 1;
+  z-index: 2;
+}
+.card-corner .r { font-size: 15px; font-weight: 700; display: block; }
+.card-corner .s { font-size: 15px; display: block; margin-top: 1px; }
+.card-corner.red { color: #b8322a; }
+.card-corner.black { color: #1a1a1a; }
+.card-corner.tr .r, .card-corner.tr .s { font-family: "Times New Roman", serif; }
+
+.card-art {
+  position: absolute;
+  left: 8px; right: 8px;
+  top: 30px;
+  height: 56px;
+  background: linear-gradient(180deg,#c9b484, #9c7a45);
+  border: 1px solid rgba(90,60,20,.6);
+  border-radius: 3px;
+  overflow: hidden;
+  z-index: 1;
+}
+.card-art svg { width: 100%; height: 100%; display: block; }
+
+.card-name {
+  position: absolute;
+  left: 0; right: 0;
+  top: 88px;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 2px;
+  font-family: "KaiTi", "STKaiti", serif;
+  font-weight: 700;
+  color: #3a2410;
+  z-index: 2;
+  padding: 1px 0;
+  text-shadow: 0 1px 0 rgba(255,240,205,.75);
+}
+.card-name.small { font-size: 12px; letter-spacing: 1px; }
+
+.card-type {
+  position: absolute;
+  left: 0; right: 0;
+  top: 108px;
+  text-align: center;
+  font-size: 9px;
+  color: #7a5a1e;
+  letter-spacing: 3px;
+  z-index: 2;
+}
+.card-flavor {
+  position: absolute;
+  left: 6px; right: 6px;
+  bottom: 4px;
+  font-size: 8px;
+  color: #6d552a;
+  text-align: center;
+  letter-spacing: 0;
+  z-index: 2;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+/* 卡背 */
+.card-back {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255,215,140,.15), transparent 60%),
+    linear-gradient(180deg, #4a2a10 0%, #2a180a 100%);
+  border-color: #c9a24a;
+}
+.card-back::before { border-color: rgba(201,162,74,.35); }
+.card-back-inner {
+  position: absolute; inset: 6px;
+  display: grid; place-items: center;
+  color: #c9a24a;
+  font-family: "KaiTi", "STKaiti", serif;
+  font-size: 26px;
+  letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(201,162,74,.6);
+  z-index: 2;
+}
+.card-back-inner::before {
+  content: "";
+  position: absolute; inset: 6px;
+  border: 1px dashed rgba(201,162,74,.35);
+  border-radius: 3px;
+}
+
+/* 手牌容器 */
+.hand-slot {
+  display: inline-block;
+  position: relative;
+  transition: transform .16s ease, margin-top .16s ease;
+}
+.hand-slot:hover { transform: translateY(-14px); z-index: 5; }
+.hand-slot.selected { transform: translateY(-24px); z-index: 6; }
+.hand-slot.selected::before {
+  content: "";
+  position: absolute; inset: -4px;
+  border: 2px solid var(--gold-hi);
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(242,214,122,.7);
+  pointer-events: none;
+  animation: glow 1.2s infinite;
+}
+.hand-slot.disabled { filter: grayscale(.8) brightness(.7); cursor: not-allowed; }
+
+/* 中央展示区中的卡 */
+.used-area .sgs-card { width: 96px; height: 134px; }
+.used-area .sgs-card .card-art { height: 62px; }
+.used-area .sgs-card .card-name { top: 96px; font-size: 15px; }
+.used-area .sgs-card .card-type { top: 116px; }
+
+/* 弹出卡牌动画 */
+.card-pop {
+  animation: cardPop .38s cubic-bezier(.2,1.4,.4,1) both;
+}
+@keyframes cardPop {
+  0% { opacity: 0; transform: scale(.4) rotate(-15deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* 装备小卡 */
+.equip-mini {
+  width: 52px;
+  height: 72px;
+  border: 1px solid #8a6a25;
+  border-radius: 4px;
+  background: linear-gradient(180deg,#efe0bc,#d8bd8b);
+  color: #3a2410;
+  font-size: 10px;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.equip-mini .eq-name { position: absolute; left: 2px; right: 2px; top: 40px; font-size: 10px; letter-spacing: 1px; font-weight: 700; line-height: 1.1; }
+.equip-mini .eq-art { position: absolute; left: 3px; right: 3px; top: 3px; height: 34px; background: linear-gradient(180deg,#c9b484,#9c7a45); border: 1px solid rgba(90,60,20,.4); border-radius: 2px; overflow: hidden; }
+.equip-mini .eq-art svg { width: 100%; height: 100%; display: block; }
+.equip-mini .eq-kind { position: absolute; left: 0; right: 0; bottom: 3px; font-size: 9px; color: #7a5a1e; letter-spacing: 2px; }
+.equip-mini.empty {
+  background: repeating-linear-gradient(45deg, rgba(0,0,0,.35) 0 4px, rgba(0,0,0,.25) 4px 8px);
+  border-style: dashed;
+}
+.equip-mini.empty::before {
+  content: "空";
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: rgba(255,255,255,.18);
+  font-size: 14px;
+}

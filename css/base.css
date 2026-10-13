@@ -1,0 +1,109 @@
+/* 三国杀·烽烟革新版 — 基础样式 */
+:root {
+  --ink: #1a120b;
+  --ink-2: #2a1e14;
+  --paper: #f2e5c9;
+  --paper-2: #e8d8b3;
+  --paper-3: #d9c69a;
+  --gold: #c9a24a;
+  --gold-hi: #f2d67a;
+  --gold-dk: #8a6a25;
+  --red: #a8241c;
+  --red-dk: #6d1512;
+  --red-hi: #d94a3a;
+  --black: #12100e;
+  --jade: #4a7f5b;
+  --blue: #2f5b7c;
+  --shadow: 0 6px 18px rgba(0,0,0,.55);
+  --shadow-sm: 0 2px 6px rgba(0,0,0,.35);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font-cjk: "Noto Serif SC", "STKaiti", "KaiTi", "Songti SC", "SimSun", "FangSong", serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  background: #120b06; color: var(--paper);
+  font-family: var(--font-cjk);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+#app { width: 100vw; height: 100vh; position: relative; }
+.screen { position: absolute; inset: 0; display: none; }
+.screen.active { display: block; }
+button { font-family: inherit; color: inherit; cursor: pointer; }
+input { font-family: inherit; }
+
+.hidden { display: none !important; }
+.tiny { font-size: 11px; opacity: .65; margin-left: 6px; }
+
+/* 通用按钮 */
+.btn {
+  border: 1px solid var(--gold-dk);
+  background: linear-gradient(180deg, #4a3520, #2a1a0e);
+  color: var(--paper);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 2px;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  box-shadow: inset 0 0 0 1px rgba(201,162,74,.25), var(--shadow-sm);
+}
+.btn:hover { background: linear-gradient(180deg, #5b4229, #361f10); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.btn.primary {
+  background: linear-gradient(180deg, #b8322a, #6d1512);
+  border-color: #e0a173;
+  box-shadow: inset 0 0 0 1px rgba(255,220,180,.35), 0 4px 12px rgba(120,20,10,.5);
+}
+.btn.primary:hover { background: linear-gradient(180deg, #d4463a, #82201a); }
+.btn.ghost { background: transparent; border-color: rgba(201,162,74,.5); color: var(--paper-3); }
+.btn.ghost:hover { background: rgba(201,162,74,.1); }
+.btn.big { padding: 12px 34px; font-size: 18px; letter-spacing: 6px; }
+.btn.small { padding: 5px 12px; font-size: 13px; letter-spacing: 1px; }
+
+.icon-btn {
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(201,162,74,.4);
+  color: var(--paper);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.icon-btn:hover { background: rgba(201,162,74,.18); }
+.icon-btn.tiny { padding: 2px 8px; font-size: 15px; }
+.icon-btn.danger { border-color: #a8241c; color: #f2b6ae; }
+.icon-btn.danger:hover { background: rgba(168,36,28,.3); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,.25); }
+::-webkit-scrollbar-thumb { background: rgba(201,162,74,.35); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,162,74,.55); }
+
+/* 花色图标 */
+.rank-h, .rank-d { color: #c9392d; }
+.rank-s, .rank-c { color: #1a1a1a; }
+.suit { display: inline-block; width: 1em; text-align: center; }
+
+/* 通用动画 */
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+@keyframes popIn { 0% { opacity:0; transform: translate(-50%,-50%) scale(.85);} 100% { opacity:1; transform: translate(-50%,-50%) scale(1);} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+@keyframes dmgFloat { 0%{opacity:0; transform:translateY(0) scale(.7)} 30%{opacity:1; transform:translateY(-24px) scale(1.2)} 100%{opacity:0; transform:translateY(-60px) scale(1)} }
+@keyframes glow { 0%,100%{box-shadow:0 0 0 rgba(242,214,122,0)} 50%{box-shadow:0 0 18px rgba(242,214,122,.9)} }
+
+.dmg-float {
+  position: absolute;
+  pointer-events: none;
+  font-size: 42px;
+  font-weight: 700;
+  color: #ff5848;
+  text-shadow: 0 0 12px #000, 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+  animation: dmgFloat 1.1s forwards;
+  z-index: 200;
+  font-family: var(--font-cjk);
+}
+.dmg-float.heal { color: #7ddc8a; }
+.dmg-float.miss { color: #d8cfb4; font-size: 26px; }

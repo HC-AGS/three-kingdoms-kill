@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>三国杀 · 烽烟革新版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="./css/base.css" />
+<link rel="stylesheet" href="./css/menu.css" />
+<link rel="stylesheet" href="./css/card.css" />
+<link rel="stylesheet" href="./css/general.css" />
+<link rel="stylesheet" href="./css/board.css" />
+<link rel="stylesheet" href="./css/dialog.css" />
+<link rel="stylesheet" href="./css/mobile.css" />
+</head>
+<body>
+<div id="app">
+  <!-- 首页/大厅 -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-bg"></div>
+    <div class="menu-frame">
+      <header class="menu-header">
+        <div class="seal">烽</div>
+        <div class="titles">
+          <h1 class="game-title">三国杀<span class="dot">·</span>烽烟革新版</h1>
+          <p class="game-sub">32 武将 · 126 卡牌 · 身份 / 2v2 / 3v3 · 纯前端单机</p>
+        </div>
+        <div class="seal right">烟</div>
+      </header>
+
+      <nav class="menu-tabs" id="menu-tabs">
+        <button class="tab active" data-tab="play">开始游戏</button>
+        <button class="tab" data-tab="generals">武将图鉴</button>
+        <button class="tab" data-tab="cards">卡牌图鉴</button>
+        <button class="tab" data-tab="rules">规则手册</button>
+      </nav>
+
+      <div class="menu-panels">
+        <!-- 开始游戏 -->
+        <div class="panel active" data-panel="play">
+          <div class="form-grid">
+            <div class="field">
+              <label>你的名字</label>
+              <input id="opt-name" type="text" maxlength="8" value="无名" />
+            </div>
+            <div class="field">
+              <label>游戏模式</label>
+              <div class="seg" id="opt-mode">
+                <button data-v="identity" class="on">身份局</button>
+                <button data-v="2v2">2v2</button>
+                <button data-v="3v3">3v3</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>人数 <small id="opt-count-tip"></small></label>
+              <div class="seg" id="opt-count">
+                <button data-v="4">4</button>
+                <button data-v="5">5</button>
+                <button data-v="6" class="on">6</button>
+                <button data-v="7">7</button>
+                <button data-v="8">8</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>AI 难度</label>
+              <div class="seg" id="opt-diff">
+                <button data-v="easy">新手</button>
+                <button data-v="normal" class="on">普通</button>
+                <button data-v="hard">老练</button>
+              </div>
+            </div>
+            <div class="field span2">
+              <label class="chk"><input id="opt-sound" type="checkbox" checked /> 音效提示<span class="tiny">(浏览器合成音)</span></label>
+              <label class="chk"><input id="opt-fast" type="checkbox" /> 快速节奏</label>
+              <label class="chk"><input id="opt-tutor" type="checkbox" checked /> 新手引导提示</label>
+              <label class="chk"><input id="opt-useapi" type="checkbox" /> 用 API AI 接管座位</label>
+              <button class="btn ghost small" id="btn-api-cfg" style="margin-left:8px;">配置 API / 扫码</button>
+              <span id="api-cfg-status" class="tiny" style="margin-left:6px;"></span>
+            </div>
+          </div>
+
+          <div class="mode-desc" id="mode-desc"></div>
+
+          <div class="menu-actions">
+            <button class="btn primary big" id="btn-start">开始一局</button>
+            <button class="btn ghost" id="btn-quick">随机快速</button>
+          </div>
+        </div>
+
+        <!-- 武将图鉴 -->
+        <div class="panel" data-panel="generals">
+          <div class="filter-row" id="gen-filter">
+            <button data-fac="all" class="on">全部 <em id="c-all">32</em></button>
+            <button data-fac="魏">魏 <em id="c-wei">8</em></button>
+            <button data-fac="蜀">蜀 <em id="c-shu">8</em></button>
+            <button data-fac="吴">吴 <em id="c-wu">8</em></button>
+            <button data-fac="群">群 <em id="c-qun">8</em></button>
+            <input id="gen-search" placeholder="搜索武将 / 技能…" />
+          </div>
+          <div class="gen-grid" id="gen-grid"></div>
+        </div>
+
+        <!-- 卡牌图鉴 -->
+        <div class="panel" data-panel="cards">
+          <div class="filter-row" id="card-filter">
+            <button data-t="all" class="on">全部</button>
+            <button data-t="basic">基本牌</button>
+            <button data-t="trick">锦囊牌</button>
+            <button data-t="equip">装备牌</button>
+          </div>
+          <div class="card-grid" id="card-grid"></div>
+        </div>
+
+        <!-- 规则手册 -->
+        <div class="panel" data-panel="rules">
+          <div class="rules-body" id="rules-body"></div>
+        </div>
+      </div>
+
+      <footer class="menu-foot">
+        <span>v1.0 ·烽烟革新规</span>
+        <span class="foot-right">本地纯前端 · 无网络请求 · AI 由脚本驱动</span>
+      </footer>
+    </div>
+  </section>
+
+  <!-- 游戏界面 -->
+  <section id="screen-game" class="screen">
+    <div class="board-bg"></div>
+
+    <header class="topbar">
+      <div class="top-left">
+        <span class="logo">烽烟</span>
+        <span class="mode-tag" id="tb-mode">身份局 6人</span>
+        <span class="round-tag" id="tb-round">第 1 轮</span>
+      </div>
+      <div class="top-mid" id="tb-phase">准备阶段</div>
+      <div class="top-right">
+        <button class="icon-btn" id="btn-fullscreen" title="全屏/退出全屏">全屏</button>
+        <button class="icon-btn" id="btn-log">战报</button>
+        <button class="icon-btn" id="btn-help">规则</button>
+        <button class="icon-btn danger" id="btn-quit">退出</button>
+      </div>
+    </header>
+
+    <main class="board" id="board">
+      <div class="center-table" id="center-table">
+        <div class="deck-pile" id="deck-pile">
+          <div class="pile-card"></div>
+          <div class="pile-card"></div>
+          <div class="pile-label"><span id="deck-count">126</span><small>牌堆</small></div>
+        </div>
+        <div class="used-area" id="used-area"></div>
+        <div class="discard-pile" id="discard-pile">
+          <div class="pile-card alt"></div>
+          <div class="pile-label"><span id="discard-count">0</span><small>弃牌堆</small></div>
+        </div>
+      </div>
+      <div class="seats" id="seats"></div>
+    </main>
+
+    <footer class="handbar" id="handbar">
+      <div class="hand-head">
+        <div class="you-general" id="you-general"></div>
+        <div class="you-meta">
+          <div class="you-name" id="you-name">无名</div>
+          <div class="you-role" id="you-role">身份未定</div>
+        </div>
+        <div class="hand-count"><em id="hand-num">4</em>/4</div>
+        <div class="hand-actions">
+          <button class="btn primary" id="btn-confirm" disabled>确定</button>
+          <button class="btn ghost" id="btn-cancel" disabled>取消</button>
+          <button class="btn small ghost hidden" id="btn-endturn">结束出牌</button>
+        </div>
+      </div>
+      <div class="hand" id="hand"></div>
+    </footer>
+
+    <aside class="log-panel" id="log-panel">
+      <header class="log-head">
+        <span>战报</span>
+        <button class="icon-btn tiny" id="btn-log-close">×</button>
+      </header>
+      <div class="log-body" id="log-body"></div>
+    </aside>
+
+    <div class="modal-root" id="modal-root"></div>
+  </section>
+
+  <!-- 结果 -->
+  <section id="screen-result" class="screen">
+    <div class="result-bg"></div>
+    <div class="result-card">
+      <div class="result-title" id="rs-title">胜利</div>
+      <div class="result-sub" id="rs-sub">身份局 · 主公阵营</div>
+      <div class="result-players" id="rs-players"></div>
+      <div class="result-actions">
+        <button class="btn primary" id="btn-again">再来一局</button>
+        <button class="btn ghost" id="btn-home">返回大厅</button>
+      </div>
+    </div>
+  </section>
+  <!-- 手机横屏/全屏引导 -->
+  <div id="orientation-gate" class="orientation-gate" hidden>
+    <div class="og-card">
+      <div class="og-icon">
+        <svg viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">
+          <defs>
+            <linearGradient id="ogg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f5dfa3"/>
+              <stop offset="100%" stop-color="#c9a24a"/>
+            </linearGradient>
+          </defs>
+          <rect class="og-phone" x="28" y="8" width="24" height="44" rx="3"
+                fill="none" stroke="url(#ogg)" stroke-width="2"/>
+          <path class="og-rotate" d="M68 40 A28 28 0 0 1 40 68"
+                fill="none" stroke="url(#ogg)" stroke-width="2.5" stroke-linecap="round"/>
+          <polyline class="og-rotate" points="60,68 68,68 68,60"
+                fill="none" stroke="url(#ogg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect class="og-phone-land" x="14" y="30" width="52" height="24" rx="3"
+                fill="none" stroke="url(#ogg)" stroke-width="2" opacity="0"/>
+        </svg>
+      </div>
+      <h2 class="og-title">请横屏游玩</h2>
+      <p class="og-desc">
+        《三国杀·烽烟革新版》棋盘布局较宽，建议将手机<b>横过来</b>使用；
+        同时点击"进入全屏"获得最佳视野。
+      </p>
+      <div class="og-actions">
+        <button class="btn primary big" id="og-confirm">进入全屏</button>
+        <button class="btn ghost" id="og-skip">稍后</button>
+      </div>
+      <div class="og-hint" id="og-hint">iOS Safari 需通过底部菜单 → 全屏 · 部分安卓会自动旋转锁定</div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "schema": "sgs-ai-endpoint/v1",
+  "name": "示例-通义千问",
+  "provider": "dashscope",
+  "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+  "apiKey": "sk-REPLACE_WITH_DASHSCOPE_KEY",
+  "model": "qwen-plus",
+  "temperature": 0.6,
+  "maxTokens": 600,
+  "responseFormat": "json",
+  "timeoutMs": 25000,
+  "seat": { "mode": "replace-one", "index": -1, "fallback": "local-bot" }
+}

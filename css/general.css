@@ -1,0 +1,182 @@
+/* 武将面板 */
+.general-port {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #3a2410, #1a0d04);
+  position: relative;
+  overflow: hidden;
+}
+.general-port svg { width: 100%; height: 100%; display: block; }
+.general-port .gp-fac {
+  position: absolute; top: 4px; left: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  color: #fff;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  z-index: 3;
+  box-shadow: 0 1px 3px rgba(0,0,0,.5);
+}
+.f-wei  { background: #2b5b8a; }
+.f-shu  { background: #1e6f3d; }
+.f-wu   { background: #a8241c; }
+.f-qun  { background: #7a5a1e; }
+.general-port .gp-name {
+  position: absolute; left: 0; right: 0; bottom: 3px;
+  text-align: center;
+  color: #f5dfa3;
+  font-family: "KaiTi", "STKaiti", serif;
+  font-size: 15px;
+  letter-spacing: 4px;
+  text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,.9);
+  z-index: 3;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,.75));
+  padding: 2px 0;
+}
+.general-port.big .gp-name { font-size: 22px; padding: 4px 0; }
+
+/* 血量条：使用小血滴 */
+.hp-bar {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  padding: 2px 4px;
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(0,0,0,.6);
+  border-radius: 3px;
+}
+.hp-dot {
+  width: 11px; height: 13px;
+  background: radial-gradient(circle at 50% 35%, #ff7d6b 0%, #c8231a 55%, #6d1512 100%);
+  clip-path: polygon(50% 0%, 100% 30%, 100% 65%, 50% 100%, 0% 65%, 0% 30%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.4);
+}
+.hp-dot.lost { background: rgba(50,50,50,.55); box-shadow: inset 0 0 0 1px rgba(0,0,0,.6); }
+.hp-dot.gold { background: radial-gradient(circle at 50% 35%, #ffe9a5 0%, #d3a537 55%, #7a5310 100%); }
+
+/* 座位面板 */
+.seat-panel {
+  --sw: 180px;
+  position: absolute;
+  width: var(--sw);
+  background: linear-gradient(180deg, rgba(46,32,20,.95), rgba(24,16,8,.95));
+  border: 1px solid rgba(201,162,74,.4);
+  border-radius: 4px;
+  padding: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.4);
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 4px 8px;
+  transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+}
+.seat-panel.current {
+  border-color: var(--gold-hi);
+  box-shadow: 0 0 0 2px rgba(242,214,122,.45), 0 6px 22px rgba(200,140,40,.5);
+}
+.seat-panel.targetable {
+  border-color: #d94a3a;
+  box-shadow: 0 0 0 2px rgba(217,74,58,.6), 0 0 18px rgba(217,74,58,.6);
+  cursor: pointer;
+}
+.seat-panel.targetable:hover { transform: scale(1.04); }
+.seat-panel.dead { filter: grayscale(1) brightness(.6); }
+.seat-panel.dying { animation: shake .5s infinite; border-color: #ff5c48; }
+.seat-panel.you {
+  --sw: 200px;
+  border-color: #f5dfa3;
+}
+.seat-panel.chained .sp-port::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(120,180,255,.35) 0 3px, transparent 3px 8px);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.sp-port { position: relative; width: 60px; height: 78px; border: 1px solid rgba(201,162,74,.5); border-radius: 3px; overflow: hidden; grid-row: 1 / span 2; }
+.sp-port .gp-name { font-size: 12px; letter-spacing: 2px; }
+.sp-name-row { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #f5dfa3; font-family: "KaiTi", "STKaiti", serif; letter-spacing: 2px; }
+.sp-name-row .role-badge {
+  font-size: 10px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+  background: rgba(201,162,74,.25);
+  color: var(--paper-2);
+}
+.sp-name-row .role-badge.lord { background: linear-gradient(180deg,#d9b041,#8a6a25); color: #1a120b; font-weight: 700; }
+.sp-name-row .role-badge.loy  { background: linear-gradient(180deg,#4a90c4,#2b5b8a); color: #fff; }
+.sp-name-row .role-badge.reb  { background: linear-gradient(180deg,#c44a3a,#7a1a10); color: #fff; }
+.sp-name-row .role-badge.spy  { background: linear-gradient(180deg,#8a6a25,#4a3520); color: #fff; }
+.sp-name-row .team-a { background: linear-gradient(180deg,#4a90c4,#2b5b8a); color: #fff; }
+.sp-name-row .team-b { background: linear-gradient(180deg,#c44a3a,#7a1a10); color: #fff; }
+
+.sp-hp { display: flex; align-items: center; gap: 5px; }
+.sp-hp .hp-num { font-size: 11px; color: #ffb4a8; letter-spacing: 1px; }
+
+.sp-meta { font-size: 11px; color: #c8b68c; letter-spacing: 1px; display: flex; gap: 6px; align-items: center; }
+.sp-meta .hand-n { color: var(--gold-hi); font-weight: 700; font-size: 13px; }
+.sp-meta .skill-tag { color: #9dc4a8; background: rgba(74,127,91,.2); padding: 0 4px; border-radius: 2px; font-size: 10px; }
+.sp-meta .skill-tag.on { color: #ffd76b; background: rgba(201,162,74,.28); }
+
+.sp-equips { grid-column: 1 / span 2; display: flex; gap: 4px; justify-content: center; padding-top: 2px; flex-wrap: wrap; }
+.sp-equips .equip-mini { width: 42px; height: 58px; }
+.sp-equips .equip-mini .eq-name { top: 32px; font-size: 9px; }
+.sp-equips .equip-mini .eq-art { height: 27px; }
+.sp-equips .equip-mini .eq-kind { font-size: 8px; bottom: 1px; }
+
+.sp-judges {
+  position: absolute;
+  left: 4px; right: 4px;
+  top: -22px;
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+}
+.sp-judge {
+  width: 20px; height: 26px;
+  background: linear-gradient(180deg,#f2e5c9,#d9c69a);
+  border: 1px solid #8a6a25;
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #3a2410;
+  box-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+
+/* 座位定位（8 人围坐） */
+.seats { position: absolute; inset: 0; pointer-events: none; }
+.seat-panel { pointer-events: auto; }
+.seat-pos-0 { left: 50%; bottom: 8px; transform: translateX(-50%); }
+.seat-pos-1 { right: 22px; bottom: 22%; }
+.seat-pos-2 { right: 30px; top: 50%; transform: translateY(-50%); }
+.seat-pos-3 { right: 22%; top: 24px; }
+.seat-pos-4 { left: 50%; top: 24px; transform: translateX(-50%); }
+.seat-pos-5 { left: 22%; top: 24px; }
+.seat-pos-6 { left: 30px; top: 50%; transform: translateY(-50%); }
+.seat-pos-7 { left: 22px; bottom: 22%; }
+/* 自己固定在底部 */
+.seat-panel[data-self="1"] { left: 50% !important; bottom: 12px !important; top: auto !important; right: auto !important; transform: translateX(-50%) !important; }
+
+/* 目标指示线 */
+.target-line { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+.target-line line { stroke: #f5dfa3; stroke-width: 2; filter: drop-shadow(0 0 6px #f5dfa3); opacity: .8; }
+
+/* 死亡覆盖 */
+.dead-mark {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: rgba(0,0,0,.35);
+  pointer-events: none;
+}
+.dead-mark span {
+  font-family: "KaiTi", "STKaiti", serif;
+  font-size: 42px;
+  color: #b8322a;
+  border: 3px double #b8322a;
+  padding: 2px 10px;
+  background: rgba(20,10,5,.6);
+  text-shadow: 0 0 12px rgba(0,0,0,.9);
+}
