@@ -15,6 +15,8 @@
 </head>
 <body>
 <div id="app">
+  <!-- 全局弹窗根节点（必须与三个 screen 平级，否则某 screen 隐藏时弹窗也隐藏） -->
+  <div class="modal-root" id="modal-root"></div>
   <!-- 首页/大厅 -->
   <section id="screen-menu" class="screen active">
     <div class="menu-bg"></div>
@@ -185,7 +187,6 @@
       <div class="log-body" id="log-body"></div>
     </aside>
 
-    <div class="modal-root" id="modal-root"></div>
   </section>
 
   <!-- 结果 -->

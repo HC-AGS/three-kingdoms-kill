@@ -45,4 +45,17 @@ export const UI = {
   askChooseOneJudgeTarget: async () => null,
   askChooseOneHandCard: async () => null,
   askChooseColorSuit: async () => null,
+  // 补齐——这些在 render.js 里手动 bind；这里先放安全桩，避免 render.js 绑定失败或某模块没加载时出特定牌崩溃
+  askGuicai: async () => null,
+  askGuidao: async () => null,
+  chooseGuanxing: async (p, view) => ({ top: view.slice(), bottom: [] }),
+  distributeCards: async () => {},
+  chooseOneOfAnyCard: async (a, t) => (t && t.hand[0]) || null,
+  showWuGuReveal: async () => {},
+  hideWuGu: () => {},
+  revealCard: async () => {},
+  chooseJiedaoPairs: async (pairs) => (pairs && pairs[0]) || null,
+  chooseCardsFromHandForSha: async (p) => (p && p.hand.find(c => c.defId==='sha')) || null,
+  chooseWuGu: async (p, pool) => (pool && pool[0]) || null,
+  setCurrentPlayerName: () => {},
 };

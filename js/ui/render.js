@@ -53,7 +53,7 @@ export const View = {
     this.renderLog();
   },
   renderSeats() {
-    if (!GS) return;
+    if (!GS || !SELF) return;
     const n = GS.players.length;
     const selfIdx = SELF.idx;
     GS.players.forEach(p => {
@@ -94,6 +94,7 @@ export const View = {
     });
   },
   renderHand() {
+    if (!GS || !SELF) return;
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
     SELF.hand.forEach(card => {
@@ -179,8 +180,10 @@ export const View = {
     }).catch(() => {});
   },
   setPhase(phase, p) {
+    if (!SELF) return;
     const map = { prepare:'准备阶段', judge:'判定阶段', draw:'摸牌阶段', play:'出牌阶段', discard:'弃牌阶段', end:'结束阶段', dying:'濒死', done:'结束' };
-    document.getElementById('tb-phase').textContent = (p ? p.name + ' · ' : '') + (map[phase] || phase);
+    const _ph = document.getElementById('tb-phase');
+    if (_ph) _ph.textContent = (p ? p.name + ' · ' : '') + (map[phase] || phase);
     // 玩家出牌阶段需要"结束出牌"按钮
     if (GS) {
       const inPlay = phase === 'play' && GS.currentIdx === SELF.idx;
@@ -839,7 +842,7 @@ UI.setCurrentPlayer = View.setCurrentPlayer.bind(View);
 UI.setPhase = View.setPhase.bind(View);
 UI.setTurnCount = View.setTurnCount.bind(View);
 UI.setCurrentPlayerName = () => {};
-UI.chooseJiedaoPairs = View.chooseJiedaoPairs?.bind(View);
+
 
 // 手牌点击处理
 function onHandCardClick(p, card, slotEl) {
@@ -1069,6 +1072,8 @@ View.chooseJiedaoPairs = async function(pairs) {
     });
   });
 };
+// 绑定放在定义之后（修正原绑定顺序 bug）
+UI.chooseJiedaoPairs = View.chooseJiedaoPairs.bind(View);
 
 const RULES_HTML = `
 <h3>回合流程</h3>
